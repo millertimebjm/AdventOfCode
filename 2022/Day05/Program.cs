@@ -42,16 +42,44 @@ for (int i = 0; i < fileList.Count(); i++)
 }
 lines.Reverse();
 
+// Part 1 Start
+// foreach (var line in lines)
+// {
+//     var instructions = line.Split(" ");
+//     var cargoCount = int.Parse(instructions[1]);
+//     var from = int.Parse(instructions[3]);
+//     var to = int.Parse(instructions[5]);
+//     cargoService.MoveMany(from, to, cargoCount);
+// }
+
+ var output = "";
+// for (int i = 0; i < count; i++)
+// {
+//     if (cargoService.Crates[i].Any())
+//     {
+//         output += cargoService.Crates[i].First();
+//     }
+//     else 
+//     {
+//         output += " ";
+//     }
+// }
+
+//Console.WriteLine(output);
+// Part 1 End
+
+
+// Part 2 Start
 foreach (var line in lines)
 {
     var instructions = line.Split(" ");
     var cargoCount = int.Parse(instructions[1]);
     var from = int.Parse(instructions[3]);
     var to = int.Parse(instructions[5]);
-    cargoService.MoveMany(from, to, cargoCount);
+    cargoService.MoveManyPart2(from, to, cargoCount);
 }
 
-var output = "";
+output = "";
 for (int i = 0; i < count; i++)
 {
     if (cargoService.Crates[i].Any())
@@ -65,4 +93,4 @@ for (int i = 0; i < count; i++)
 }
 
 Console.WriteLine(output);
-
+// Part 2 End

@@ -25,5 +25,18 @@ namespace AdventOfCodeCSharp.Day05
                 Move(oldStack, newStack);
             }
         }
+
+        public void MoveManyPart2(int oldStack, int newStack, int count)
+        {
+            var data = new char[count];
+            for (int i = 0; i < count; i++)
+            {
+                data[i] = Crates[oldStack-1].Pop();
+            }
+            for (int i = 0; i < count; i++)
+            {
+                Crates[newStack-1].Push(data[count-(i+1)]);
+            }
+        }
     }
 }
