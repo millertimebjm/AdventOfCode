@@ -21,25 +21,22 @@
                 {
                     grid[x,y] = new Cell(x, y);
                     grid[x,y].Value = file[y][x];
-                    if (file[y][x] == 'S')
-                    {
-                        startLocation = grid[x,y];
-                        startLocation.Value = 'a';
-                    }
                     if (file[y][x] == 'E')
                     {
-                        endLocation = grid[x,y];
-                        endLocation.Value = 'z';
+                        startLocation = grid[x,y];
+                        startLocation.Value = 'z';
                     }
                 }
             }
             
             startLocation.ShortestPath = 0;
             startLocation.Visit(grid);
-            while(endLocation.ShortestPath == int.MaxValue)
+            endLocation = startLocation;
+            while(endLocation.Value != 'a')
             {
                 var cell = Cell.GetLowestDistanceCell(grid);
                 cell.Visit(grid);
+                endLocation = cell;
             }
             Console.WriteLine(endLocation.ShortestPath);
         }
@@ -130,10 +127,11 @@
                     && nextCellCoord.Y >= 0)
                     {
                         var nextCell = grid[nextCellCoord.X, nextCellCoord.Y];
-                        if ((int)(nextCell.Value) <= ((int)Value + 1)
-                            || (nextCell.Value) == 'a'
-                            || (nextCell.Value) == 'b'
-                            || ((nextCell.Value) == 'E' && (int)'z' <= ((int)Value + 1)))
+                        // if ((int)(nextCell.Value) <= ((int)Value + 1)
+                        //     || (nextCell.Value) == 'a'
+                        //     || (nextCell.Value) == 'b'
+                        //     || ((nextCell.Value) == 'E' && (int)'z' <= ((int)Value + 1)))
+                        if ((int)(nextCell.Value) >= ((int)Value - 1))
                             {
                                 if (ShortestPath + 1 < nextCell.ShortestPath)
                                 {
