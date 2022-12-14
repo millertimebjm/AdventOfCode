@@ -7,7 +7,7 @@
             // See https://aka.ms/new-console-template for more information
             Console.WriteLine("Hello, World!");
 
-            var file = await File.ReadAllLinesAsync("input.txt");
+            var file = await File.ReadAllLinesAsync("input-test.txt");
             var IntegerOrArraySets = new List<Tuple<IntegerOrArray, IntegerOrArray>>();
             for (int i = 0; i < file.Length; i += 3)
             {

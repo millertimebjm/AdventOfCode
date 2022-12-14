@@ -18,19 +18,24 @@
             {
                 string[] cellStrings = line.Split(" -> ");
                 var lastCellArray = cellStrings.First().Split(",");
-                var lastCell = new Cell(int.Parse(lastCellArray[0]), int.Parse(lastCellArray[1]));
+                var lastCell = new Cell(int.Parse(lastCellArray[0]) + 500, int.Parse(lastCellArray[1]));
                 if (lastCell.Y > lowestY) lowestY = lastCell.Y;
                 for (int i = 1; i < cellStrings.Count(); i++)
                 {
                     var cellArray = cellStrings[i].Split(",");
-                    var currentCell = new Cell(int.Parse(cellArray[0]), int.Parse(cellArray[1]));
+                    var currentCell = new Cell(int.Parse(cellArray[0]) + 500, int.Parse(cellArray[1]));
                     BuildWall(cavern, lastCell, currentCell);
                     if (int.Parse(cellArray[1]) > lowestY) lowestY = int.Parse(cellArray[1]);
                     lastCell = currentCell;
                 }
             }
 
-            var sandStart = new Cell(500, 0);
+            for (int i = 0; i < cavern.GetLength(0); i++)
+            {
+                cavern[i, lowestY + 2] = CellType.Wall;
+            }
+
+            var sandStart = new Cell(1000, 0);
             var done = false;
             var sandCount = 0;
             while (!done)
@@ -40,7 +45,7 @@
             }
 
             // See https://aka.ms/new-console-template for more information
-            Console.WriteLine("sandCount: " + (sandCount - 1));
+            Console.WriteLine("sandCount: " + (sandCount));
         }
 
         public static bool DropNextSand(CellType[,] cavern, Cell sandStart, int lowestY)
@@ -65,13 +70,17 @@
                 {
                     sandDone = true;
                     cavern[sandCell.X, sandCell.Y] = CellType.Sand;
+                    if (sandCell.X == sandStart.X && sandCell.Y == sandStart.Y)
+                    {
+                        done = true;
+                    }
                 }
 
-                if (sandCell.Y > lowestY)
-                {
-                    sandDone = true;
-                    done = true;
-                }
+                // if (sandCell.Y > lowestY)
+                // {
+                //     sandDone = true;
+                //     done = true;
+                // }
             }
             return done;
         }
