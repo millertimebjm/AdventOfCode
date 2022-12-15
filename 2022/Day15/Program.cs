@@ -23,7 +23,8 @@
                 tuples.Add(new Tuple<Cell, Cell>(new Cell(int.Parse(cellString1[0]), int.Parse(cellString1[1])), new Cell(int.Parse(cellString2[0]), int.Parse(cellString2[1]))));
             }
 
-            var magicY = 10;
+            //var magicY = 10;
+            var magicY = 2000000;
             var result = new List<Cell>();
             var beacons = tuples.Select(_ => _.Item2).ToList();
             var signals = tuples.Select(_ => _.Item1).ToList();
@@ -32,13 +33,14 @@
                 var distance = Cell.GetDistance(set.Item1, set.Item2);
                 for (int i = -distance; i <= distance; i++)
                 {
-                    var currentX = set.Item1.X + i;
-                    var jLength = distance - Math.Abs(i);
-                    for (int j = -jLength; j <= jLength; j++)
+                    var currentY = set.Item1.Y + i;
+                    if (currentY == magicY)
                     {
-                        var currentY = set.Item1.Y + j;
-                        if (currentY == 10)
+                        var jLength = distance - Math.Abs(i);
+                        for (int j = -jLength; j <= jLength; j++)
                         {
+                            var currentX = set.Item1.X + j;
+
                             var checkCell = new Cell(currentX, currentY);
                             if (!result.Contains(checkCell)
                                 && !beacons.Contains(checkCell)
@@ -46,8 +48,10 @@
                             {
                                 result.Add(checkCell);
                             }
+
                         }
                     }
+
                 }
             }
             Console.WriteLine(result.Count());
