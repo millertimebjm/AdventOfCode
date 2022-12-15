@@ -64,9 +64,18 @@
                     if (!beacons.Any(_ => _.X == i && _.Y == magicY)) resultCount++;
                 }
             }
-
-
             Console.WriteLine(resultCount);
+
+            // part 2
+            foreach (var set in tuples)
+            {
+                var distance = Cell.GetDistance(set.Item1, set.Item2);
+                foreach (var set2 in tuples)
+                {
+                    var distance2 = Cell.GetDistance(set2.Item1, set.Item2);
+
+                }
+            }
 
         }
     }
