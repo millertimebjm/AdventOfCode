@@ -29,6 +29,7 @@
             var beacons = tuples.Select(_ => _.Item2).ToList();
             var signals = tuples.Select(_ => _.Item1).ToList();
             var resultTuples = new List<Tuple<int, int>>();
+            var resultCount = 0;
             foreach (var set in tuples)
             {
                 var distance = Cell.GetDistance(set.Item1, set.Item2);
@@ -54,14 +55,18 @@
                         resultTuples.Add(new Tuple<int, int>(set.Item1.X - jLength, set.Item1.X + jLength));
                     }
                 }
-                for (int i = resultTuples.OrderBy(_ => _.Item1).First().Item1; i <= resultTuples.OrderBy(_ => _.Item2).Last().Item2; i++)
-                {
 
+            }
+            for (int i = resultTuples.OrderBy(_ => _.Item1).First().Item1; i <= resultTuples.OrderBy(_ => _.Item2).Last().Item2; i++)
+            {
+                if (resultTuples.Any(_ => _.Item1 <= i && i <= _.Item2))
+                {
+                    if (!beacons.Any(_ => _.X == i && _.Y == magicY)) resultCount++;
                 }
             }
 
 
-            //Console.WriteLine(result.Count());
+            Console.WriteLine(resultCount);
 
         }
     }
