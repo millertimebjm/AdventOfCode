@@ -25,9 +25,10 @@
 
             //var magicY = 10;
             var magicY = 2000000;
-            var result = new List<Cell>();
+            //var result = new List<Cell>();
             var beacons = tuples.Select(_ => _.Item2).ToList();
             var signals = tuples.Select(_ => _.Item1).ToList();
+            var resultTuples = new List<Tuple<int, int>>();
             foreach (var set in tuples)
             {
                 var distance = Cell.GetDistance(set.Item1, set.Item2);
@@ -37,25 +38,31 @@
                     if (currentY == magicY)
                     {
                         var jLength = distance - Math.Abs(i);
-                        for (int j = -jLength; j <= jLength; j++)
-                        {
-                            var currentX = set.Item1.X + j;
+                        // for (int j = -jLength; j <= jLength; j++)
+                        // {
+                        //     var currentX = set.Item1.X + j;
 
-                            var checkCell = new Cell(currentX, currentY);
-                            if (!result.Contains(checkCell)
-                                && !beacons.Contains(checkCell)
-                                && !signals.Contains(checkCell))
-                            {
-                                result.Add(checkCell);
-                            }
+                        //     var checkCell = new Cell(currentX, currentY);
+                        //     if (!result.Contains(checkCell)
+                        //         && !beacons.Contains(checkCell)
+                        //         && !signals.Contains(checkCell))
+                        //     {
+                        //         result.Add(checkCell);
+                        //     }
 
-                        }
+                        // }
+                        resultTuples.Add(new Tuple<int, int>(set.Item1.X - jLength, set.Item1.X + jLength));
                     }
+                }
+                for (int i = resultTuples.OrderBy(_ => _.Item1).First().Item1; i <= resultTuples.OrderBy(_ => _.Item2).Last().Item2; i++)
+                {
 
                 }
             }
-            Console.WriteLine(result.Count());
-            result = result.OrderBy(_ => _.X).ToList();
+
+
+            //Console.WriteLine(result.Count());
+
         }
     }
 
