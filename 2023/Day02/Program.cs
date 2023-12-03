@@ -7,23 +7,24 @@ public class Program
 
         var games = await Parse(input);
 
-        var total = 0;
+        var totalAnswer1 = 0;
+        var totalAnswer2 = 0;
         foreach (var game in games)
         {
             if (game.GameResults.All(_ => _.Red <= 12)
                 && game.GameResults.All(_ => _.Green <= 13)
                 && game.GameResults.All(_ => _.Blue <= 14))
                 {
-                    //Console.WriteLine($"{game.GameId} count:{game.GameResults.Count()}");
-                    //Console.WriteLine($"{game.GameId.ToString()} count:{game.GameResults.Count()} Red:{game.GameResults.Max(_ => _.Red)} Green:{game.GameResults.Max(_ => _.Green)} Blue:{game.GameResults.Max(_ => _.Blue)}");
-                    total += game.GameId;
+                    totalAnswer1 += game.GameId;
                 }
-            // else 
-            // {
-            //     Console.WriteLine($"{game.GameId.ToString()} count:{game.GameResults.Count()} Red:{game.GameResults.Max(_ => _.Red)} Green:{game.GameResults.Max(_ => _.Green)} Blue:{game.GameResults.Max(_ => _.Blue)}");
-            // }
+            totalAnswer2 += 
+                game.GameResults.Max(_ => _.Red)
+                * game.GameResults.Max(_ => _.Green)
+                * game.GameResults.Max(_ => _.Blue);
+
         }
-        Console.WriteLine(total);
+        Console.WriteLine(totalAnswer1);
+        Console.WriteLine(totalAnswer2);
     }
 
     public static async Task<IEnumerable<Game>> Parse(string[] input)
@@ -34,12 +35,12 @@ public class Program
             var newLine = line.Replace("Game ", "");
             var game = new Game();
             game.GameId = int.Parse(newLine.Split(':')[0]);
-            foreach (var gameResultString in newLine.Split(';').Select(_ => _.Trim()))
+            
+            foreach (var gameResultString in (newLine.Split(":")[1]).Split(';').Select(_ => _.Trim()))
             {
                 var gameResult = await ParseGameResult(gameResultString);
                 game.GameResults.Add(gameResult);
             }
-            Console.WriteLine($"{game.GameId} {game.GameResults.First().Red} {game.GameResults.First().Green} {game.GameResults.First().Blue}");
             games.Add(game);
         }
         return games;
