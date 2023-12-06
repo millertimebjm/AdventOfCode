@@ -12,15 +12,23 @@ public class RaceTests
     [InlineData(10, 5, 25)]
     [InlineData(100, 50, 2500)]
     public void CalculateSingleBeatDistanceTest(
-        long timing, long waitTime, long distance
-    )
+        long timing, long waitTime, long distance)
     {
         var singleDistance = Timing.CalculateSingleDistance(timing, waitTime);
         Assert.Equal(singleDistance, distance);
     }
 
+    [Fact]
     public void CalculateBeatDistance()
     {
-
+        var timing = new Timing();
+        timing.Distance = 9;
+        timing.Time = 7;
+        var beatTimings = timing.CalculateBeatDistance();
+        Assert.Contains(2, beatTimings);
+        Assert.Contains(3, beatTimings);
+        Assert.Contains(4, beatTimings);
+        Assert.Contains(5, beatTimings);
+        Assert.Equal(4, beatTimings.Count);
     }
 }

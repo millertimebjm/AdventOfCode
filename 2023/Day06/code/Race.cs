@@ -1,12 +1,12 @@
 public class Race
 {
-    public List<Timing> Timings {get; set;}
+    public List<Timing> Timings { get; set; }
 }
 
 public class Timing
 {
-    public long Time {get; set;}
-    public long Distance {get; set;}
+    public long Time { get; set; }
+    public long Distance { get; set; }
 
     public List<long> CalculateBeatDistance()
     {
@@ -16,7 +16,7 @@ public class Timing
             var thisTimeDistance = CalculateSingleDistance(
                 Time, waitTime: i);
             if (thisTimeDistance > Distance)
-            beatDistances.Add(thisTimeDistance);
+                beatDistances.Add(i);
         }
         return beatDistances;
     }
