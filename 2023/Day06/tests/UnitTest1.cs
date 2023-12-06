@@ -21,9 +21,7 @@ public class RaceTests
     [Fact]
     public void CalculateBeatDistance()
     {
-        var timing = new Timing();
-        timing.Distance = 9;
-        timing.Time = 7;
+        var timing = new Timing(7, 9);
         var beatTimings = timing.CalculateBeatDistance();
         Assert.Contains(2, beatTimings);
         Assert.Contains(3, beatTimings);

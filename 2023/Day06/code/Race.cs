@@ -1,12 +1,18 @@
 public class Race
 {
-    public List<Timing> Timings { get; set; }
+    public List<Timing> Timings { get; set; } = new List<Timing>();
 }
 
 public class Timing
 {
     public long Time { get; set; }
     public long Distance { get; set; }
+
+    public Timing(long time, long distance)
+    {
+        Time = time;
+        Distance = distance;
+    }
 
     public List<long> CalculateBeatDistance()
     {
