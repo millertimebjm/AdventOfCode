@@ -1,4 +1,5 @@
 ﻿using System.Runtime.CompilerServices;
+using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 
 public class Program
@@ -20,7 +21,7 @@ public class Program
             hand.Bid = long.Parse(lineArray[1]);
             hand.HandTypeName = HandType.GetHandType(hand);
 
-            hand = hand.FindBestHand();
+            Hand.FindBestHand(hand, null, null);
 
             hands.Add(hand);
         }
@@ -130,21 +131,42 @@ public class Hand
         return string.Join("", Cards.Select(_ => _.OrderValue));
     }
 
-    public Hand FindBestHand(List<Card> cards)
+    public static List<Hand> FindBestHand(Hand hand, int? index, List<Hand> newHands)
     {
-        var newHands = new List<Hand>();
-        var cardsWithoutJoker = cards.Where(_ => _.Label != "J").ToList();
-        // for (int i = 0; i < Cards.Count; i++)
-        // {
-        //     if (Cards[i].Label == "J")
-        //     {
-        //         foreach (var cardWithoutJoker in cardsWithoutJoker)
-        //         {
+        var cardsWithoutJoker = Card.SeedCards().Where(_ => _.Label != "J");
+        if (index == null)
+        {
+            newHands = new List<Hand>();
+            newHands.Add(hand);
+            for (int i = 0; i < hand.Cards.Count; i++)
+            {
+                if (hand.Cards[i].Label == "J")
+                {
+                    foreach (var cardWithoutJoker in cardsWithoutJoker)
+                    {
+                        FindBestHand(hand, index, null);
+                    }
+                    break;
+                }
+            }
+        }
 
-        //         }
-        //     }
-        // }
-        return null;
+        if (index != null)
+        {
+            for (int i = index.Value+1; i < hand.Cards.Count; i++)
+            {
+                if (hand.Cards[i].Label == "J")
+                {
+                    foreach (var cardWithoutJoker in cardsWithoutJoker)
+                    {
+                        FindBestHand(hand, index, null);
+                    }
+                    break;
+                }
+            }
+        }
+        
+        
     }
 }
 
