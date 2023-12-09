@@ -1,6 +1,7 @@
 ﻿using System.Runtime.CompilerServices;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
+using Microsoft.VisualBasic;
 
 public class Program
 {
@@ -17,11 +18,18 @@ public class Program
             foreach (var cardChar in lineArray[0])
             {
                 hand.Cards.Add(cards.Single(_ => _.Label == cardChar.ToString()));
+                hand.OriginalCards.Add(cards.Single(_ => _.Label == cardChar.ToString()));
             }
             hand.Bid = long.Parse(lineArray[1]);
             hand.HandTypeName = HandType.GetHandType(hand);
 
-            Hand.FindBestHand(hand, null, null);
+            var handsSet = Hand.FindBestHand(hand, null);
+            foreach (var handSet in handsSet)
+            {
+                handSet.HandTypeName = HandType.GetHandType(handSet);
+                //Console.WriteLine($"{string.Join("", handSet.Cards.Select(_ => _.Label))}:{handSet.HandTypeName}");
+            }
+            hand = handsSet.OrderByDescending(_ => (int)_.HandTypeName).First();
 
             hands.Add(hand);
         }
@@ -34,7 +42,7 @@ public class Program
         long result = 0;
         for (long i = 0; i < hands.Count; i++)
         {
-            Console.WriteLine($"{string.Join("", hands[(int)i].Cards.Select(_ => _.Label))} {hands[(int)i].Bid} * {i + 1}");
+            Console.WriteLine($"{string.Join("", hands[(int)i].Cards.Select(_ => _.Label))} {hands[(int)i].Bid} * {i + 1} -> OriginalCards:{string.Join("", hands[(int)i].OriginalCards.Select(_ => _.Label))}");
             result += hands[(int)i].Bid * (i + 1);
         }
 
@@ -122,51 +130,87 @@ public class HandType
 
 public class Hand
 {
+    public List<Card> OriginalCards {get; set;} = new List<Card>();
     public List<Card> Cards { get; set; } = new List<Card>();
     public long Bid { get; set; }
     public HandType.HandTypeNameEnum HandTypeName { get; set; }
 
     public string GetCardValueString()
     {
-        return string.Join("", Cards.Select(_ => _.OrderValue));
+        return string.Join("", OriginalCards.Select(_ => _.OrderValue));
     }
 
-    public static List<Hand> FindBestHand(Hand hand, int? index, List<Hand> newHands)
+    public Hand Clone()
     {
-        var cardsWithoutJoker = Card.SeedCards().Where(_ => _.Label != "J");
+        var newHand = new Hand();
+        newHand.Bid = Bid;
+        foreach (var card in Cards)
+        {
+            newHand.Cards.Add(new Card(card.Label));
+        }
+        foreach (var originalCard in OriginalCards)
+        {
+            newHand.OriginalCards.Add(originalCard);
+        }
+        return newHand;
+    }
+
+    // public static List<Hand> FindBestHand(Hand hand, int? index, List<Hand> newHands)
+    // {
+    //     var cardsWithoutJoker = Card.SeedCards().Where(_ => _.Label != "J");
+    //     if (index == null)
+    //     {
+    //         newHands = new List<Hand>();
+    //         newHands.Add(hand);
+    //         index = 0;
+    //     }
+    //     for (int i = index.Value; i < hand.Cards.Count; i++)
+    //     {
+    //         if (hand.Cards[i].Label == "J")
+    //         {
+    //             foreach (var cardWithoutJoker in cardsWithoutJoker)
+    //             {
+    //                 var newHand = hand.Clone();
+    //                 newHand.Cards[i] = cardWithoutJoker;
+    //                 newHands.AddRange(FindBestHand(nweHand, index+1, newHands));
+    //             }
+    //             break;
+    //         }
+    //     }
+        
+    //     return newHands;
+    // }
+
+    public static List<Hand> FindBestHand(Hand hand, int? index)
+    {
+        List<Hand> newHands = new List<Hand>();
+        var allCards = Card.SeedCards();
+        var first = false;
         if (index == null)
         {
-            newHands = new List<Hand>();
-            newHands.Add(hand);
-            for (int i = 0; i < hand.Cards.Count; i++)
-            {
-                if (hand.Cards[i].Label == "J")
-                {
-                    foreach (var cardWithoutJoker in cardsWithoutJoker)
-                    {
-                        FindBestHand(hand, index, null);
-                    }
-                    break;
-                }
-            }
+            first = true;
+            index = 0;
         }
-
-        if (index != null)
+        int i = index.Value;
+        for (; i < hand.Cards.Count; i++)
         {
-            for (int i = index.Value+1; i < hand.Cards.Count; i++)
+            if (hand.Cards[i].Label == "J")
             {
-                if (hand.Cards[i].Label == "J")
+                foreach (var card in allCards)
                 {
-                    foreach (var cardWithoutJoker in cardsWithoutJoker)
-                    {
-                        FindBestHand(hand, index, null);
-                    }
-                    break;
+                    var newHand = hand.Clone();
+                    newHand.Cards[i] = card;
+                    var beforeCount = newHands.Count;
+                    newHands.AddRange(FindBestHand(newHand, i + 1));
                 }
+                break;
             }
         }
-        
-        
+        if (i == hand.Cards.Count)
+        {
+            return new List<Hand> {hand};
+        }
+        return newHands;
     }
 }
 
