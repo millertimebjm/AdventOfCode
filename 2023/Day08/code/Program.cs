@@ -36,46 +36,67 @@ public class Program
         }
         int i = 0;
         var currentFoundRepititions = 0;
-        while (!nodePaths.All(_ => _.RepititionCount.HasValue))
+        while (!nodePaths.All(_ => _.RepititionCount.Count > 1))
         {
             Node.NextNode(nodes, currentNodes, directions[i%directions.Length]);
             for (int j = 0; j < currentNodes.Count; j++)
             {
                 nodePaths[j].Nodes.Add(new Node(currentNodes[j].Name));
-                if (!nodePaths[j].RepititionCount.HasValue
+                if (!(nodePaths[j].RepititionCount.Count > 1)
                     && currentNodes[j].Name.EndsWith("Z"))
                 {
-                    nodePaths[j].RepititionCount = i;
+                    nodePaths[j].RepititionCount.Add(i);
                 }
             }
-            if (nodePaths.Count(_ => _.RepititionCount.HasValue) > currentFoundRepititions)
+            if (nodePaths.Count(_ => _.RepititionCount.Count > 1) > currentFoundRepititions)
             {
-                currentFoundRepititions = nodePaths.Count(_ => _.RepititionCount.HasValue);
+                currentFoundRepititions = nodePaths.Count(_ => _.RepititionCount.Count > 1);
                 Console.WriteLine($"{currentFoundRepititions}/{nodePaths.Count}");
             }
             i++;
         }
 
-        Console.WriteLine(string.Join(" ", nodePaths.Select(_ => _.RepititionCount.Value)));
-
-
-        //var total = nodePaths.Select(_ => _.RepititionCount).Aggregate((x, y) => x * y);
-        //var bigIntegerList = nodePaths.Select(_ => new BigInteger(_.RepititionCount.Value));
-        // var total = new BigInteger(1);
-        // foreach (var nodePath in nodePaths)
-        // {
-        //     total = BigInteger.Multiply(total, nodePath.RepititionCount.Value);
-        // }
-        
-        var nodePathCounts = nodePaths.Select(_ => _.RepititionCount.Value).ToList();
-        long total = nodePathCounts.Max();
-        while (!nodePathCounts.All(_ => total % _ == 0))
+        foreach (var nodePath in nodePaths)
         {
-            total += nodePathCounts.Max();
-            Console.WriteLine(total);
+            Console.WriteLine(string.Join(" ", nodePath.RepititionCount.ToList()));    
         }
 
-        Console.WriteLine(total);
+        var currentCount = new List<long>();
+        foreach (var nodePath in nodePaths)
+        {
+            currentCount.Add(nodePath.RepititionCount.Last());
+        }
+        var addAmount = new List<long>();
+        foreach (var nodePath in nodePaths)
+        {
+            addAmount.Add(nodePath.RepititionCount[1] - nodePath.RepititionCount[0]);
+        }
+        while (currentCount.GroupBy(_ => _).First().Count() != 6)
+        {
+            var minimumCount = currentCount[0];
+            var indexMinimumCount = 0;
+            for(int j = 1; j < currentCount.Count; j++)
+            {
+
+                if (currentCount[j] < minimumCount)
+                indexMinimumCount = j;
+            }
+            currentCount[indexMinimumCount] += addAmount[indexMinimumCount];
+            Console.WriteLine(string.Join(" ", currentCount.Select(_ => _)));
+        }
+
+        Console.WriteLine(currentCount[0]);
+
+        
+        // var nodePathCounts = nodePaths.Select(_ => _.RepititionCount.w).ToList();
+        // long total = nodePathCounts.Max();
+        // while (!nodePathCounts.All(_ => total % _ == 0))
+        // {
+        //     total += nodePathCounts.Max();
+        //     Console.WriteLine(total);
+        // }
+
+        // Console.WriteLine(total);
     }
 
 
@@ -165,13 +186,13 @@ public class Node
 public class NodePath
 {
     public List<Node> Nodes {get;set;}
-    public long? RepititionCount {get; set;}
+    public List<long> RepititionCount {get; set;} = new List<long>();
 
     public long FindRepetition()
     {
-        if (RepititionCount.HasValue)
+        if (RepititionCount.Count > 1)
         {
-            return RepititionCount.Value;
+            return RepititionCount.Last();
         }
         var firstNode = Nodes.First();
         var verifiableRepititionCount = 3;
@@ -201,7 +222,7 @@ public class NodePath
                 }
                 if (foundRepititions == verifiableRepititionCount)
                 {
-                    RepititionCount = (i+1) / 3;
+                    RepititionCount.Add((i+1) / 3);
                 }
             }
         }
