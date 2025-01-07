@@ -6,6 +6,8 @@
 *.user
 *.sln.docstates
 
+a.out
+
 # Build results
 
 [Dd]ebug/
@@ -13,6 +15,8 @@
 x64/
 [Bb]in/
 [Oo]bj/
+
+.vscode/
 
 # MSTest test Results
 [Tt]est[Rr]esult*/
