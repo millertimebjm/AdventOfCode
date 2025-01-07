@@ -62,7 +62,72 @@ public interface IMapService
 
 public class FileMapService : IMapService
 {
-    
+    public void Defrag(MapModel map)
+    {
+        int firstOpenSpace = 0;
+        int lastTakenSpace = map.Cells.Count - 1;
+        while(firstOpenSpace < lastTakenSpace)
+        {
+            if (map.Cells[firstOpenSpace].FileId >= 0) 
+            {
+                firstOpenSpace++;
+                continue;
+            }
+            if (map.Cells[lastTakenSpace].FileId < 0)
+            {
+                lastTakenSpace--;
+                continue;
+            }
+            
+            var freeSpace = CountFreeSpace(map, firstOpenSpace);
+            var fileSize = CountFileSize(map, lastTakenSpace);
+
+            throw new NotImplementedException();
+        }
+    }
+
+    private int CountFileSize(MapModel map, int endingIndex)
+    {
+        if (map.Cells[endingIndex].FileId == -1) throw new ArgumentException("Cell at index is not a file.");
+        var currentIndex = endingIndex;
+        var currentFileId = map.Cells[endingIndex].FileId;
+        while (endingIndex > 0 && map.Cells[currentIndex].FileId == currentFileId)
+        {
+            currentIndex++;
+        }
+        return endingIndex - currentIndex + 1;
+    }
+
+    private int CountFreeSpace(MapModel map, int startingIndex)
+    {
+        var currentIndex = startingIndex;
+        while (startingIndex < map.Cells.Count && map.Cells[currentIndex].FileId == -1)
+        {
+            currentIndex++;
+        }
+        return startingIndex - currentIndex;
+    }
+
+    public long GetMapValue(MapModel map)
+    {
+        long mapValue = 0;
+        for (int i = 0; i < map.Cells.Count; i++)
+        {
+            if (map.Cells[i].FileId != -1)
+            {
+                mapValue += (long)map.Cells[i].FileId * (long)i;
+            }
+        }
+        return mapValue;
+    }
+
+
+    public long GetNextFileId(MapModel map)
+    {
+        var currentFileId = map.MaxFileId;
+        map.MaxFileId++;
+        return currentFileId;
+    }
 }
 
 public class BlockMapService : IMapService
