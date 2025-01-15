@@ -15,12 +15,66 @@ public class Program {
 
         Part1(robots, maxX, maxY);
         Part2(robots, maxX, maxY);
+    }
 
+    public static void DisplayRobots(List<RobotModel> robots, int maxX, int maxY)
+    {
+        var robotsOrdered = robots.OrderBy(robot => robot.Y).ThenBy(robot => robot.X).ToList();
+        int robotIndex = 0;
+
+        for (int i = 0; i < maxY; i++)
+        {
+            for (int j = 0; j < maxX; j++)
+            {
+                bool anyFound = false;
+                while (robotIndex < robotsOrdered.Count 
+                    && robotsOrdered[robotIndex].X == j && robotsOrdered[robotIndex].Y == i)
+                {
+                    if (!anyFound) Console.Write("*");
+                    robotIndex++;
+                    anyFound = true;
+                }
+                if (!anyFound)
+                {
+                    Console.Write(".");
+                }
+                
+            }
+            Console.WriteLine();
+        }
     }
 
     public static void Part2(List<RobotModel> robots, int maxX, int maxY)
     {
+        int index = 1;
+        IRobotService robotService = new RobotService();
+        while(true)
+        {
+            foreach (var robot in robots)
+            {
+                robotService.NextPosition(robot, maxX, maxY);
+            }
+            Console.WriteLine(index);
+            
+            var robotsOrdered = robots.OrderBy(robot => robot.Y).ThenBy(robot => robot.X).ToList();
+            bool duplicateFound = false;
+            for (int i = 0; i < robotsOrdered.Count-2; i++)
+            {
+                int x1 = robotsOrdered[i].X;
+                int x2 = robotsOrdered[i+1].X;
+                int y1 = robotsOrdered[i].Y;
+                int y2 = robotsOrdered[i+1].Y;
 
+                if (x1 == x2 && y1 == y2)
+                    duplicateFound = true;
+            }
+            if (!duplicateFound)
+            {
+                DisplayRobots(robots, maxX, maxY);
+                Console.ReadLine();
+            }
+            index++;
+        }
     }
 
     public static void Part1(List<RobotModel> robots, int maxX, int maxY) 

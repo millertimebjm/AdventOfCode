@@ -1,23 +1,26 @@
 ﻿
+
+
 public class Program 
 {
     public static void Main(string[] args)
     {
-        // See https://aka.ms/new-console-template for more information
-        Console.WriteLine("Hello, World!");
-
-        IMapService mapService = new BlockMapService();
-        var line = File.ReadAllLines("input_test.txt").First();
+        IMapService mapService = new FileMapService();
+        var line = File.ReadAllLines("input.txt").First();
         var map = ReadMap(mapService, line);
         foreach (var cell in map.Cells)
         {
-            Console.Write(cell.FileId);
+            Console.Write(cell.FileId == -1 ? "." : cell.FileId);
         }
-        Console.WriteLine();
+        Console.WriteLine("asdf1");
+        Console.WriteLine("asdf2");
+        Console.WriteLine("asdf3");
+        Console.WriteLine("asdf4");
+
         mapService.Defrag(map);
         foreach (var cell in map.Cells)
         {
-            Console.Write(cell.FileId);
+            Console.Write(cell.FileId == -1 ? "." : cell.FileId);
         }
         Console.WriteLine();
         long mapValue = mapService.GetMapValue(map);
@@ -58,6 +61,11 @@ public interface IMapService
     void Defrag(MapModel map);
     long GetMapValue(MapModel map);
     long GetNextFileId(MapModel map);
+    public int CountFreeSpace(MapModel map, int startingIndex);
+    public int CountFileSize(MapModel map, int endingIndex);
+    public void MoveFileToFreeSpace(MapModel map, int emptyStartingSpace, int lastFileIdSpace);
+
+
 }
 
 public class FileMapService : IMapService
@@ -66,46 +74,70 @@ public class FileMapService : IMapService
     {
         int firstOpenSpace = 0;
         int lastTakenSpace = map.Cells.Count - 1;
-        while(firstOpenSpace < lastTakenSpace)
+        long currentFileId = -1;
+        while (lastTakenSpace > 0)
         {
+            if (lastTakenSpace == firstOpenSpace)
+            {
+                while ((map.Cells[lastTakenSpace].FileId == currentFileId || map.Cells[lastTakenSpace].FileId == -1) && lastTakenSpace > 0) lastTakenSpace--;
+                firstOpenSpace = 0;
+                currentFileId = map.Cells[lastTakenSpace].FileId;
+                continue;
+            }
             if (map.Cells[firstOpenSpace].FileId >= 0) 
             {
                 firstOpenSpace++;
                 continue;
             }
-            if (map.Cells[lastTakenSpace].FileId < 0)
+            if (map.Cells[firstOpenSpace].FileId == -1) 
             {
-                lastTakenSpace--;
-                continue;
+                var freeSpace = CountFreeSpace(map, firstOpenSpace);
+                var fileSize = CountFileSize(map, lastTakenSpace);
+                if (freeSpace >= fileSize) 
+                {
+                    MoveFileToFreeSpace(map, firstOpenSpace, lastTakenSpace);
+                    while ((map.Cells[lastTakenSpace].FileId == currentFileId || map.Cells[lastTakenSpace].FileId == -1) && lastTakenSpace > 0) lastTakenSpace--;
+                    firstOpenSpace = 0;
+                    currentFileId = map.Cells[lastTakenSpace].FileId;
+                    continue;
+                }
             }
-            
-            var freeSpace = CountFreeSpace(map, firstOpenSpace);
-            var fileSize = CountFileSize(map, lastTakenSpace);
-
-            throw new NotImplementedException();
+            firstOpenSpace++;
         }
     }
 
-    private int CountFileSize(MapModel map, int endingIndex)
+    public void MoveFileToFreeSpace(MapModel map, int emptyStartingSpace, int lastFileIdSpace)
+    {
+        var currentFileId = map.Cells[lastFileIdSpace].FileId;
+        while (map.Cells[lastFileIdSpace].FileId == currentFileId)
+        {
+            map.Cells[emptyStartingSpace].FileId = currentFileId;
+            map.Cells[lastFileIdSpace].FileId = -1;
+            emptyStartingSpace++;
+            lastFileIdSpace--;
+        }
+    }
+
+    public int CountFileSize(MapModel map, int endingIndex)
     {
         if (map.Cells[endingIndex].FileId == -1) throw new ArgumentException("Cell at index is not a file.");
         var currentIndex = endingIndex;
         var currentFileId = map.Cells[endingIndex].FileId;
         while (endingIndex > 0 && map.Cells[currentIndex].FileId == currentFileId)
         {
-            currentIndex++;
+            currentIndex--;
         }
-        return endingIndex - currentIndex + 1;
+        return endingIndex - currentIndex;
     }
 
-    private int CountFreeSpace(MapModel map, int startingIndex)
+    public int CountFreeSpace(MapModel map, int startingIndex)
     {
         var currentIndex = startingIndex;
         while (startingIndex < map.Cells.Count && map.Cells[currentIndex].FileId == -1)
         {
             currentIndex++;
         }
-        return startingIndex - currentIndex;
+        return currentIndex - startingIndex;
     }
 
     public long GetMapValue(MapModel map)
@@ -172,6 +204,21 @@ public class BlockMapService : IMapService
         map.MaxFileId++;
         return currentFileId;
     }
+
+    public int CountFreeSpace(MapModel map, int startingIndex)
+    {
+        throw new NotImplementedException();
+    }
+
+    public int CountFileSize(MapModel map, int endingIndex)
+    {
+        throw new NotImplementedException();
+    }
+
+    public void MoveFileToFreeSpace(MapModel map, int emptyStartingSpace, int lastFileIdSpace)
+    {
+        throw new NotImplementedException();
+    }
 }
 
 public class MapModel
@@ -189,3 +236,4 @@ public class CellModel
         FileId = fileId;
     }
 }
+
