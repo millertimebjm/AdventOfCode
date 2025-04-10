@@ -117,6 +117,7 @@ struct Cell* FindEndingCell(char **strings, int num_strings) {
 
 struct Cell* Exists(struct CellVector *cellVector, struct Cell *cell) {
     printf("exists\n");
+    printf("cellVector size: %d\n", cellVector->size);
     printf("getting cell info in exists: %d, %d, %d\n", cell->x, cell->y, cell->minimumCost);
     for (int i = 0; i < cellVector->size; i++) {
         printf("internal cell info %d, %d\n", cellVector->cells[i]->x, cellVector->cells[i]->y);
@@ -126,8 +127,19 @@ struct Cell* Exists(struct CellVector *cellVector, struct Cell *cell) {
     return NULL;
 }
 
-struct Cell* Remove(struct CellVector *cellVector, struct Cell *cell) {
-    return NULL;   
+bool Remove(struct CellVector *cellVector, struct Cell *cell) {
+    bool found = false;
+    for (int i = 0; i < cellVector->size; i++) {
+	if (!found && cell->x == cellVector->cells[i]->x && cell->y == cellVector->cells[i]->y) {
+	    found = true;
+	}
+	if (found && cellVector->size > i +1) {
+	    cellVector->cells[i]->x = cellVector->cells[i+1]->x;
+	    cellVector->cells[i]->y = cellVector->cells[i+1]->y;
+	    cellVector->cells[i]->minimumCost = cellVector->cells[i+1]->minimumCost;
+	}
+    }
+    return found;   
 }
 
 struct Cell* GetMinimumCostCell(struct CellVector *cellVector) {
@@ -214,9 +226,9 @@ int main() {
     cellsToReview->cells = malloc(cellsToReview->max_size * sizeof(struct Cell*));
 
     struct CellVector *cellsMinimumCost = malloc(sizeof(struct CellVector));
-    cellsToReview->max_size = max_size;
-    cellsToReview->size = 0;
-    cellsToReview->cells = malloc(cellsToReview->max_size * sizeof(struct Cell*));
+    cellsMinimumCost->max_size = max_size;
+    cellsMinimumCost->size = 0;
+    cellsMinimumCost->cells = malloc(cellsMinimumCost->max_size * sizeof(struct Cell*));
 
     struct Cell *startingCell = FindStartingCell(strings, num_strings);
     struct Cell *endingCell = FindEndingCell(strings, num_strings);
@@ -225,15 +237,18 @@ int main() {
     printf("starting cell: %d, %d\n", startingCell->x, startingCell->y);
     printf("ending cell: %d, %d\n", endingCell->x, endingCell->y);
 
-
     AddCellsToReview(cellsToReview, startingCell, strings, num_strings, '>');
     printf("after first cells to review\n");
     while (cellsToReview->size > 0
         && Exists(cellsMinimumCost, endingCell) == NULL) {
-        printf("get minimum cost cell\n");
-        struct Cell *minimumCostCell = GetMinimumCostCell(cellsMinimumCost);
-        Remove(cellsMinimumCost, minimumCostCell);
+        printf("get minimum cost cell size: %d\n", cellsToReview->size);
+        struct Cell *minimumCostCell = GetMinimumCostCell(cellsToReview);
+	printf("after get minimum cost cell\n");
+        Remove(cellsToReview, minimumCostCell);
         AddCellsToReview(cellsToReview, minimumCostCell, strings, num_strings, facingDirection);
+	printf("after add cells to review: %d\n", cellsToReview->size);
+	char * str[25];
+	scanf("%[^\n]s", &str);
     }
 
     struct Cell *minimumCostEndingCell = Exists(cellsMinimumCost, endingCell);

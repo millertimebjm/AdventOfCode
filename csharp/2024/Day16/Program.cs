@@ -7,7 +7,7 @@ public class Program
 {
     public static async Task Main(string[] args)
     {
-        var lines = await File.ReadAllLinesAsync("input.txt");
+        var lines = await File.ReadAllLinesAsync("input_test.txt");
         var startingCell = FindStartingCell(lines);
         var endingCell = FindEndingCell(lines);
 
@@ -31,7 +31,10 @@ public class Program
         var endingCellComplete = minimumCostCells.Single(c => c.X == endingCell.X && c.Y == endingCell.Y);
         Console.WriteLine(endingCellComplete.MinimumScore);
 
-        var cells = cellService.GetAllBestPathsRecursive(startingCell, endingCell, minimumCostCells);
+        var maxScore = endingCellComplete.MinimumScore;
+        List<Cell> currentPath = new() {startingCell};
+
+        var cells = cellService.GetAllBestPathsRecursive(startingCell, endingCell, currentPath, maxScore, lines);
         cells = cells.Distinct().ToList();
         Console.WriteLine(cells.Count());
     }
@@ -120,7 +123,7 @@ public class CellService
         {
             int cost = GetDirectionsCost(nextCell.Direction, '<');
             var newCell = new Cell(nextCell.X-1, nextCell.Y, nextCell.MinimumScore + cost + 1, '<');
-            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y && c.MinimumScore == newCell.MinimumScore))
+            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y))
             {
                 cells.Add(newCell);
             }
@@ -129,7 +132,7 @@ public class CellService
         {
             int cost = GetDirectionsCost(nextCell.Direction, '>');
             var newCell = new Cell(nextCell.X+1, nextCell.Y, nextCell.MinimumScore + cost + 1, '>');
-            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y && c.MinimumScore == newCell.MinimumScore))
+            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y))
             {
                 cells.Add(newCell);
             }
@@ -138,7 +141,7 @@ public class CellService
         {
             int cost = GetDirectionsCost(nextCell.Direction, '^');
             var newCell = new Cell(nextCell.X, nextCell.Y-1, nextCell.MinimumScore + cost + 1, '^');
-            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y && c.MinimumScore == newCell.MinimumScore))
+            if (!minimumCostCells.Any(c => c.X == newCell.X && c.Y == newCell.Y))
             {
                 cells.Add(newCell);
             }
@@ -174,20 +177,49 @@ public class CellService
         throw new Exception("Bad GetValue result");
     }
 
-    internal List<Cell> GetAllBestPathsRecursive(Cell currentCell, Cell endingCell, List<Cell> minimumCostCells)
+    internal List<Cell> GetAllBestPathsRecursive(Cell currentCell, Cell endingCell, List<Cell> currentPath, int maxScore, string[] lines)
     {
-        if (currentCell.X == endingCell.X && currentCell.Y == endingCell.Y) return new List<Cell>{endingCell};
+        if (currentCell.X == endingCell.X && currentCell.Y == endingCell.Y) return currentPath;
 
         var cells = new List<Cell>();
-        var adjacentCells = minimumCostCells.Where(c => Math.Abs(c.X - currentCell.X) + Math.Abs(c.Y - currentCell.Y) == 1 && (c.MinimumScore - currentCell.MinimumScore == 1 || c.MinimumScore - currentCell.MinimumScore == 1001));
-        
-        foreach (var adjacentCell in adjacentCells)
+        if (lines[currentCell.Y][currentCell.X-1] == '.' || lines[currentCell.Y][currentCell.X-1] == 'E')
         {
-            var returnedCells = GetAllBestPathsRecursive(adjacentCell, endingCell, minimumCostCells);
-            if (returnedCells.Any())
+            int cost = GetDirectionsCost(currentCell.Direction, '<');
+            var newCell = new Cell(currentCell.X-1, currentCell.Y, currentCell.MinimumScore + cost + 1, '<');
+            if (newCell.MinimumScore <= maxScore)
             {
-                cells.Add(adjacentCell);
-                cells.AddRange(returnedCells);
+                currentPath.Add(newCell);
+                cells.AddRange(GetAllBestPathsRecursive(newCell, endingCell, currentPath, maxScore, lines));
+            }
+        }
+        if (lines[currentCell.Y][currentCell.X+1] == '.' || lines[currentCell.Y][currentCell.X+1] == 'E')
+        {
+            int cost = GetDirectionsCost(currentCell.Direction, '>');
+            var newCell = new Cell(currentCell.X+1, currentCell.Y, currentCell.MinimumScore + cost + 1, '>');
+            if (newCell.MinimumScore <= maxScore)
+            {
+                currentPath.Add(newCell);
+                cells.AddRange(GetAllBestPathsRecursive(newCell, endingCell, currentPath, maxScore, lines));
+            }
+        }
+        if (lines[currentCell.Y-1][currentCell.X] == '.' || lines[currentCell.Y-1][currentCell.X] == 'E')
+        {
+            int cost = GetDirectionsCost(currentCell.Direction, '^');
+            var newCell = new Cell(currentCell.X, currentCell.Y-1, currentCell.MinimumScore + cost + 1, '^');
+            if (newCell.MinimumScore <= maxScore)
+            {
+                currentPath.Add(newCell);
+                cells.AddRange(GetAllBestPathsRecursive(newCell, endingCell, currentPath, maxScore, lines));
+            }
+        }
+        if (lines[currentCell.Y+1][currentCell.X] == '.' || lines[currentCell.Y+1][currentCell.X] == 'E')
+        {
+            int cost = GetDirectionsCost(currentCell.Direction, 'v');
+            var newCell = new Cell(currentCell.X, currentCell.Y+1, currentCell.MinimumScore + cost + 1, 'v');
+            if (newCell.MinimumScore <= maxScore)
+            {
+                currentPath.Add(newCell);
+                cells.AddRange(GetAllBestPathsRecursive(newCell, endingCell, currentPath, maxScore, lines));
             }
         }
         return cells;
