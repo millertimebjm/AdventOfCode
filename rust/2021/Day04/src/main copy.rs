@@ -1,14 +1,11 @@
 use std::fs;
 
 struct Board {
-    cells: Vec<(u32, u32, u32, bool)>,
-    unmarked_sum: u32,
-    bingo_sequence: u32
+    cells: Vec<(u32, u32, u32, bool)>
 }
 
 fn main() {
     let file_path = "input.txt";
-    let mut bingo_sequence_current: u32 = 1;
 
     let contents = fs::read_to_string(file_path)
         .expect("There was an error reading the file.");
@@ -24,9 +21,7 @@ fn main() {
 
     let mut row_number = 0;
     let mut current_board: Board = Board {
-        cells: vec![],
-        unmarked_sum: 0,
-        bingo_sequence: 0
+        cells: vec![]
     };
 
     for text in contents.lines().skip(2) {
@@ -34,9 +29,7 @@ fn main() {
             row_number = 0;
             boards.push(current_board);
             current_board = Board {
-                cells: vec![],
-                unmarked_sum: 0,
-                bingo_sequence: 0
+                cells: vec![]
             };
         }
         let row: Vec<&str> = text.split_whitespace().filter(|s| !s.is_empty()).collect();
@@ -48,7 +41,7 @@ fn main() {
         }
     }
     boards.push(current_board);
-    let number_of_boards: u32 = boards.len().try_into().unwrap();
+
     println!("{}", boards.len());
 
     println!("");
@@ -64,27 +57,20 @@ fn main() {
         let called_number_int:u32 = called_number_string.parse().expect("");
         //let mut called_number: u32 = called_number_string.parse().expect("");
         for board in &mut boards {
-            if board.unmarked_sum > 0 {
-                continue;
-            }
             mark_bingo_card(board, called_number_int);
             is_bingo = check_for_bingo(board);
             if is_bingo {
                 //first_board_bingo = &board;
 
                 is_bingo_fn(board);
-                board.unmarked_sum = get_unmarked_sum(&board);
-                println!("unmarked_sum total is: {}, last number is {called_number_int}, total is: {}", board.unmarked_sum, board.unmarked_sum * called_number_int);
-                board.bingo_sequence = bingo_sequence_current;
-                bingo_sequence_current += 1;
-                // if number_of_boards == board.bingo_sequence {
-
-                // }
+                let unmarked_sum: u32 = get_unmarked_sum(&board);
+                println!("unmarked_sum total is: {unmarked_sum}, last number is {called_number_int}, total is: {}", unmarked_sum * called_number_int);
+                break;
             }
         }
-        // if is_bingo {
-        //     break;
-        // }
+        if is_bingo {
+            break;
+        }
     }
     
 }
