@@ -1,7 +1,7 @@
 ﻿// See https://aka.ms/new-console-template for more information
 Console.WriteLine("Hello, World!");
 
-var lines = await File.ReadAllLinesAsync("input-test.txt");
+var lines = await File.ReadAllLinesAsync("input.txt");
 var velocities = new List<Velocity>();
 foreach (var line in lines)
 {
@@ -20,9 +20,10 @@ foreach (var velocity in velocities)
     // {
     //     zeroes++;
     // }
-    (dial, var crossedCount) = DialMoverService.MovePart2(dial, velocity);
-    Console.WriteLine($"{velocity.Direction.ToString().Substring(0, 1)}{velocity.Amount} - {dial} - {crossedCount}");
+    (var newDial, var crossedCount) = DialMoverService.MovePart2(dial, velocity);
+    Console.WriteLine($"{dial} - {velocity.Direction.ToString().Substring(0, 1)}{velocity.Amount} - {newDial} - {crossedCount}");
     zeroes += crossedCount;
+    dial = newDial;
 }
 
 Console.WriteLine(zeroes);
@@ -43,17 +44,24 @@ public static class DialMoverService
     public static (int, int) MovePart2(int dial, Velocity velocity)
     {
         int crossed = 0;
+        var oldDial = dial;
         if (velocity.Direction == DirectionEnum.Left) dial -= velocity.Amount;
         if (velocity.Direction == DirectionEnum.Right) dial += velocity.Amount;
+
+        var looped = false;
 
         while (dial >= 100) {
             dial -= 100;
             crossed++;
+            looped = true;
         }
         while (dial < 0) {
             dial += 100;
-            crossed++;
+            if (looped || oldDial != 0) crossed++;
+            looped = true;
         }
+
+        if (dial == 0 && !looped) crossed++;
 
         return (dial, crossed);
     } 
